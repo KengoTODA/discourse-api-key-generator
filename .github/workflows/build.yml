@@ -30,7 +30,7 @@ jobs:
           node-version: "12.x"
       - run: |
           npm ci
-          npm run build
+          npm pack
           npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
