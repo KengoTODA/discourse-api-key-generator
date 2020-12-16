@@ -1,0 +1,65 @@
+{
+  "name": "discourse-api-key-generator",
+  "description": "A commandline app generating discourse API token",
+  "version": "0.0.0-development",
+  "author": "Kengo TODA <skypencil@gmail.com>",
+  "bin": {
+    "discourse-api-key-generator": "./bin/run"
+  },
+  "bugs": "https://github.com/KengoTODA/discourse-api-key-generator/issues",
+  "dependencies": {
+    "@oclif/command": "^1.8.0",
+    "@oclif/config": "^1.17.0",
+    "@oclif/plugin-help": "^3.2.1",
+    "open": "^7.3.0",
+    "tslib": "^1.14.1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1.26.0",
+    "@types/node": "^10.17.49",
+    "@typescript-eslint/parser": "^4.9.1",
+    "eslint": "^7.15.0",
+    "eslint-plugin-github": "^4.1.1",
+    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-oclif-typescript": "^0.1.0",
+    "ts-node": "^8.10.2",
+    "semantic-release": "^17.3.0",
+    "typescript": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib"
+  ],
+  "homepage": "https://github.com/KengoTODA/discourse-api-key-generator",
+  "keywords": [
+    "discourse",
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "bin": "discourse-api-key-generator"
+  },
+  "repository": "KengoTODA/discourse-api-key-generator",
+  "scripts": {
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+    "version": "oclif-dev readme && git add README.md",
+    "all": "npm run format && npm run test && npm pack",
+    "semantic-release": "semantic-release"
+  },
+  "types": "lib/index.d.ts",
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github",
+      "@semantic-release/npm"
+    ]
+  }
+}
