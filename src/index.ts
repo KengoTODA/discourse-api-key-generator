@@ -81,7 +81,7 @@ class DiscourseApiKeyGenerator extends Command {
     }),
   }
 
-  async run() {
+  async run(): Promise<void> {
     const parsed = this.parse(DiscourseApiKeyGenerator)
     server.listen(0, async () => {
       const addressInfo = server.address()
