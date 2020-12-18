@@ -71,7 +71,7 @@ class DiscourseApiKeyGenerator extends Command {
     url: flags.string({
       char: 'u',
       description:
-        'URL of Discourse to access. e.g. https://meta.discourse.org/',
+        'URL of Discourse to access. e.g. https://meta.discourse.org',
       required: true,
     }),
     app: flags.string({
