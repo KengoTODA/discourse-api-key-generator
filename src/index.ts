@@ -3,7 +3,9 @@ import {hostname} from 'os'
 import open from 'open'
 import {createInterface} from 'readline'
 import {generateKeyPairSync, privateDecrypt, constants} from 'crypto'
+import debug from 'debug'
 
+const print = debug('discourse-api-key-generator')
 const {publicKey, privateKey} = generateKeyPairSync('rsa', {
   modulusLength: 4096,
   publicKeyEncoding: {
@@ -29,7 +31,7 @@ function buildUrl(site: string, applicationName: string): string {
   url.searchParams.append('scopes', 'write')
   url.searchParams.append('public_key', publicKey)
   url.searchParams.append('nonce', '1')
-  console.debug(`redirect URL is ${url.href}`)
+  print(`redirect URL is ${url.href}`)
   return url.href
 }
 
@@ -70,7 +72,7 @@ class DiscourseApiKeyGenerator extends Command {
       'Please input the encoded key displayed in the Discourse:',
       encodedKey => {
         const trim = encodedKey.trim().replace(/\s/g, '')
-        console.debug(`trimmed encoded key is ${trim}`)
+        print(`trimmed encoded key is ${trim}`)
         const decreptedKey = privateDecrypt(
           {
             key: privateKey,
@@ -79,10 +81,10 @@ class DiscourseApiKeyGenerator extends Command {
           Buffer.from(trim, 'base64')
         )
         const json = decreptedKey.toString('ascii')
-        console.debug(`The decoded json is ${json}`)
+        print(`The decoded json is ${json}`)
         readline.close()
 
-        console.info(`Done. The API key is ${JSON.parse(json).key}.`)
+        console.info(`Done. The API key is ${JSON.parse(json).key}`)
         process.exit(0)
       }
     )
