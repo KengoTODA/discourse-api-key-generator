@@ -1,7 +1,6 @@
 {
     "plugins": ["@typescript-eslint"],
     "extends": [
-      "plugin:github/recommended",
       "oclif",
       "oclif-typescript"
     ],
@@ -12,7 +11,10 @@
       "project": "./tsconfig.json"
     },
     "rules": {
+      "comma-dangle": "off",
       "no-console": "off",
+      "no-process-exit": "off",
+      "unicorn/no-process-exit": "off",
       "eslint-comments/no-use": "off",
       "import/no-namespace": "off",
       "no-unused-vars": "off",

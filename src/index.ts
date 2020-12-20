@@ -1,58 +1,29 @@
 import {Command, flags} from '@oclif/command'
-import {createServer} from 'http'
 import {hostname} from 'os'
 import open from 'open'
-import {parse} from 'url'
-import {generateKeyPairSync, privateDecrypt} from 'crypto'
+import {createInterface} from 'readline'
+import {generateKeyPairSync, privateDecrypt, constants} from 'crypto'
 
 const {publicKey, privateKey} = generateKeyPairSync('rsa', {
   modulusLength: 4096,
   publicKeyEncoding: {
-    type: 'spki',
+    type: 'pkcs1',
     format: 'pem',
   },
   privateKeyEncoding: {
-    type: 'pkcs8',
+    type: 'pkcs1',
     format: 'pem',
-    cipher: 'aes-256-cbc',
-    passphrase: 'top secret',
   },
 })
 
-const server = createServer((req, res) => {
-  try {
-    if (req.url === undefined) {
-      throw new Error('No URL found form the given request')
-    }
-
-    const queryObject = parse(req.url, true).query
-    let encodedKey = queryObject.payload
-    if (encodedKey === undefined) {
-      throw new Error('The response from discource has no payload')
-    }
-    if (Array.isArray(encodedKey)) {
-      encodedKey = encodedKey.join()
-    }
-    console.debug(`encoded key is ${encodedKey}`)
-    const decreptedKey = privateDecrypt(privateKey, Buffer.from(encodedKey))
-    console.log(`Done. The API key is ${decreptedKey}.`)
-    res.setHeader('Content-Type', 'text/plain')
-    res.write(`Done. The API key is ${decreptedKey}.`)
-  } finally {
-    res.end()
+function buildUrl(site: string, applicationName: string): string {
+  if (!site.startsWith('https://')) {
+    throw new Error('The site URL should start with "https://"')
+  } else if (site.endsWith('/')) {
+    throw new Error('The site URL name should have no trailing slash')
   }
-})
+  const url = new URL(`${site}/user-api-key/new`)
 
-function buildUrl(port: number, host: string, applicationName: string): string {
-  if (!host.startsWith('https://')) {
-    throw new Error('The host name should start with "https://"')
-  } else if (host.endsWith('/')) {
-    throw new Error('The host name should have no trailing slash')
-  }
-  const redirectUrl = `http://localhost:${port}/callback`
-  const url = new URL(`${host}/user-api-key/new`)
-
-  url.searchParams.append('auth_redirect', redirectUrl)
   url.searchParams.append('application_name', applicationName)
   url.searchParams.append('client_id', hostname())
   url.searchParams.append('scopes', 'write')
@@ -83,20 +54,38 @@ class DiscourseApiKeyGenerator extends Command {
 
   async run(): Promise<void> {
     const parsed = this.parse(DiscourseApiKeyGenerator)
-    server.listen(0, async () => {
-      const addressInfo = server.address()
-      if (addressInfo === null || typeof addressInfo === 'string') {
-        console.error(`Unexpected address info: ${addressInfo}`)
-      } else {
-        const port = addressInfo.port
-        const url = buildUrl(port, parsed.flags.url, parsed.flags.app)
-        try {
-          await open(url)
-        } catch (error) {
-          console.error(`Failed to launch browser. ${error.stack}`)
-        }
-      }
+    const url = buildUrl(parsed.flags.url, parsed.flags.app)
+    try {
+      await open(url)
+    } catch (error) {
+      console.error(`Failed to launch browser. ${error.stack}`)
+      process.exit(1)
+    }
+
+    const readline = createInterface({
+      input: process.stdin,
+      output: process.stdout,
     })
+    readline.question(
+      'Please input the encoded key displayed in the Discourse:',
+      encodedKey => {
+        const trim = encodedKey.trim().replace(/\s/g, '')
+        console.debug(`trimmed encoded key is ${trim}`)
+        const decreptedKey = privateDecrypt(
+          {
+            key: privateKey,
+            padding: constants.RSA_PKCS1_PADDING,
+          },
+          Buffer.from(trim, 'base64')
+        )
+        const json = decreptedKey.toString('ascii')
+        console.debug(`The decoded json is ${json}`)
+        readline.close()
+
+        console.info(`Done. The API key is ${JSON.parse(json).key}.`)
+        process.exit(0)
+      }
+    )
   }
 }
 
