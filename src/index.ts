@@ -60,7 +60,11 @@ class DiscourseApiKeyGenerator extends Command {
     try {
       await open(url)
     } catch (error) {
-      console.error(`Failed to launch browser. ${error.stack}`)
+      if (error instanceof Error) {
+        console.error(`Failed to launch browser. ${error.message}`)
+      } else {
+        console.error(`Failed to launch browser.`)
+      }
       process.exit(1)
     }
 
