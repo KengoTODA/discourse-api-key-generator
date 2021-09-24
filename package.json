@@ -20,7 +20,7 @@
     "@types/debug": "^4.1.5",
     "@typescript-eslint/parser": "^4.9.1",
     "eslint": "^7.15.0",
-    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-oclif": "^4.0.0",
     "eslint-config-oclif-typescript": "^1.0.0",
     "eslint-plugin-github": "^4.1.1",
     "semantic-release": "^18.0.0",
